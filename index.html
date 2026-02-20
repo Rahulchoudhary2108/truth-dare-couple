@@ -14,89 +14,99 @@
 }
 
 body{
-    background: radial-gradient(circle at top,#4b006e,#1a001f);
+    background: radial-gradient(circle at center,#4b006e,#1a001f);
     color:white;
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    overflow:hidden;
+    text-align:center;
 }
 
+/* Container */
 .container{
-    width:100%;
-    max-width:700px;
-    padding:20px;
-    text-align:center;
-    position:relative;
+    width:90%;
+    max-width:600px;
 }
 
 /* Screens */
 .screen{
-    position:absolute;
-    width:100%;
-    opacity:0;
-    transform:translateY(20px);
-    transition:all .6s ease;
-    pointer-events:none;
+    display:none;
+    animation:fade .6s ease;
 }
 
 .screen.active{
-    opacity:1;
-    transform:translateY(0);
-    pointer-events:auto;
+    display:block;
+}
+
+@keyframes fade{
+    from{opacity:0;transform:translateY(15px);}
+    to{opacity:1;transform:translateY(0);}
 }
 
 /* Logo */
 .logo{
-    font-size:36px;
+    font-size:32px;
     font-weight:bold;
+    margin-bottom:30px;
     animation:pulse 2s infinite;
 }
 
 @keyframes pulse{
-    0%,100%{opacity:.5;transform:scale(.95);}
-    50%{opacity:1;transform:scale(1.05);}
+    0%,100%{opacity:.6;}
+    50%{opacity:1;}
 }
 
-/* Buttons */
+/* Button */
 button{
     padding:14px 25px;
-    margin:12px;
+    margin:15px;
     font-size:20px;
     border:none;
     border-radius:30px;
-    cursor:pointer;
     background:#ff008c;
     color:white;
+    cursor:pointer;
     transition:.3s;
-    min-width:150px;
 }
 
 button:hover{
-    transform:scale(1.1);
-    box-shadow:0 0 20px rgba(255,0,140,.7);
+    transform:scale(1.08);
+    box-shadow:0 0 15px rgba(255,0,140,.6);
 }
 
-/* Bottle */
-.bottle-container{
-    margin-top:30px;
-}
-
+/* CSS Bottle */
 .bottle{
-    width:120px;
+    width:40px;
+    height:120px;
+    margin:40px auto;
+    background:linear-gradient(#ff008c,#99004d);
+    border-radius:20px 20px 10px 10px;
+    position:relative;
+    transform-origin:center 80%;
     transition:transform 3s cubic-bezier(.25,.1,.25,1);
 }
 
-/* Card Flip */
+.bottle:before{
+    content:"";
+    position:absolute;
+    top:-30px;
+    left:10px;
+    width:20px;
+    height:30px;
+    background:#ff008c;
+    border-radius:5px;
+}
+
+/* Card */
 .card-container{
-    margin-top:30px;
     perspective:1000px;
+    margin-top:30px;
 }
 
 .card{
     width:100%;
-    min-height:150px;
+    min-height:140px;
     position:relative;
     transform-style:preserve-3d;
     transition:transform .8s;
@@ -113,8 +123,7 @@ button:hover{
     padding:25px;
     border-radius:20px;
     background:rgba(255,255,255,0.1);
-    backdrop-filter:blur(10px);
-    font-size:24px;
+    font-size:22px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -124,12 +133,10 @@ button:hover{
     transform:rotateY(180deg);
 }
 
-/* Responsive */
 @media(max-width:600px){
-    .logo{font-size:28px;}
-    button{font-size:18px;padding:12px 18px;}
-    .card-face{font-size:20px;}
-    .bottle{width:90px;}
+    .logo{font-size:26px;}
+    button{font-size:18px;}
+    .card-face{font-size:18px;}
 }
 </style>
 </head>
@@ -143,27 +150,21 @@ button:hover{
     <button onclick="startGame()">Start</button>
 </div>
 
-<!-- SPIN SCREEN -->
+<!-- SPIN -->
 <div id="spinScreen" class="screen">
     <h2>Spin the Bottle</h2>
-    <div class="bottle-container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Wine_bottle_icon.svg/512px-Wine_bottle_icon.svg.png"
-        class="bottle" id="bottle">
-    </div>
+    <div class="bottle" id="bottle"></div>
     <button onclick="spinBottle()">SPIN</button>
 </div>
 
-<!-- CARD SCREEN -->
+<!-- CARD -->
 <div id="cardScreen" class="screen">
     <h2 id="modeTitle"></h2>
 
     <div class="card-container">
         <div class="card" id="card">
-            <div class="card-face">
-                Tap Reveal 💜
-            </div>
-            <div class="card-face card-back" id="cardText">
-            </div>
+            <div class="card-face">Tap Reveal 💜</div>
+            <div class="card-face card-back" id="cardText"></div>
         </div>
     </div>
 
@@ -174,57 +175,58 @@ button:hover{
 </div>
 
 <script>
-let truths = [];
-let dares = [];
-let currentMode = "";
+let truths=[];
+let dares=[];
+let currentMode="";
 
-/* LOAD CSV FILE */
+/* Load CSV */
 fetch("questions.csv")
-.then(response => response.text())
-.then(data => {
-    const rows = data.split("\n").slice(1);
-    rows.forEach(row => {
-        const columns = row.split(",");
-        if(columns.length >= 2){
-            const type = columns[0].trim().toLowerCase();
-            const question = columns[1].trim();
-            if(type === "truth") truths.push(question);
-            if(type === "dare") dares.push(question);
+.then(response=>response.text())
+.then(data=>{
+    const rows=data.split("\n").slice(1);
+    rows.forEach(row=>{
+        const cols=row.split(",");
+        if(cols.length>=2){
+            const type=cols[0].trim().toLowerCase();
+            const question=cols[1].trim();
+            if(type==="truth") truths.push(question);
+            if(type==="dare") dares.push(question);
         }
     });
 })
-.catch(error => {
-    console.log("CSV loading error:", error);
+.catch(err=>{
+    console.log("CSV Load Error:",err);
 });
 
 /* Screen Switch */
-function switchScreen(current,next){
-    document.getElementById(current).classList.remove("active");
-    document.getElementById(next).classList.add("active");
+function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
 }
 
 function startGame(){
-    switchScreen("intro","spinScreen");
+    showScreen("spinScreen");
 }
 
 /* Spin */
 function spinBottle(){
     const bottle=document.getElementById("bottle");
     const randomDeg=3600+Math.floor(Math.random()*360);
-    bottle.style.transform=`rotate(${randomDeg}deg)`;
+    bottle.style.transform="rotate("+randomDeg+"deg)";
 
     setTimeout(()=>{
         currentMode=Math.random()<0.5?"truth":"dare";
         document.getElementById("modeTitle").innerText=currentMode.toUpperCase();
         loadQuestion();
-        switchScreen("spinScreen","cardScreen");
+        showScreen("cardScreen");
     },3000);
 }
 
+/* Load Question */
 function loadQuestion(){
-    let list = currentMode === "truth" ? truths : dares;
-    if(list.length === 0){
-        document.getElementById("cardText").innerText = "No questions loaded.";
+    let list=currentMode==="truth"?truths:dares;
+    if(list.length===0){
+        document.getElementById("cardText").innerText="No questions found.";
         return;
     }
     const random=list[Math.floor(Math.random()*list.length)];
@@ -238,55 +240,8 @@ function flipCard(){
 
 function spinAgain(){
     document.getElementById("bottle").style.transform="rotate(0deg)";
-    switchScreen("cardScreen","spinScreen");
+    showScreen("spinScreen");
 }
-</script>
-
-
-let currentMode="";
-
-/* Screen Switch */
-function switchScreen(current,next){
-    document.getElementById(current).classList.remove("active");
-    document.getElementById(next).classList.add("active");
-}
-
-function startGame(){
-    switchScreen("intro","spinScreen");
-}
-
-/* Spin Bottle */
-function spinBottle(){
-    const bottle=document.getElementById("bottle");
-    const randomDeg=3600+Math.floor(Math.random()*360);
-    bottle.style.transform=`rotate(${randomDeg}deg)`;
-
-    setTimeout(()=>{
-        currentMode=Math.random()<0.5?"truth":"dare";
-        document.getElementById("modeTitle").innerText=currentMode.toUpperCase();
-        loadQuestion();
-        switchScreen("spinScreen","cardScreen");
-    },3000);
-}
-
-/* Load Question */
-function loadQuestion(){
-    const list=data[currentMode];
-    const random=list[Math.floor(Math.random()*list.length)];
-    document.getElementById("cardText").innerText=random;
-    document.getElementById("card").classList.remove("flip");
-}
-
-/* Flip */
-function flipCard(){
-    document.getElementById("card").classList.toggle("flip");
-}
-
-function spinAgain(){
-    document.getElementById("bottle").style.transform="rotate(0deg)";
-    switchScreen("cardScreen","spinScreen");
-}
-
 </script>
 
 </body>
