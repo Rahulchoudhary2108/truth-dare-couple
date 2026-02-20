@@ -5,22 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Truth or Dare - Couple Edition</title>
 
+<!-- Romantic Cursive Font -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
 }
 
 body{
     height:100vh;
-    background:url("background.jpg") center/cover no-repeat;
+    background:url("background.png") center/cover no-repeat;
     display:flex;
     justify-content:center;
     align-items:center;
     color:white;
     overflow:hidden;
+    font-family:'Poppins', sans-serif;
 }
 
 /* Dark overlay */
@@ -28,87 +31,114 @@ body::before{
     content:"";
     position:absolute;
     inset:0;
-    background:rgba(0,0,0,0.55);
+    background:rgba(0,0,0,0.6);
     backdrop-filter:blur(6px);
+    z-index:0;
+}
+
+/* Floating Hearts */
+.heart{
+    position:absolute;
+    color:#ff4da6;
+    font-size:20px;
+    animation:float 8s linear infinite;
+    opacity:0.7;
+}
+
+@keyframes float{
+    from{transform:translateY(100vh) scale(0.8); opacity:0;}
+    50%{opacity:0.8;}
+    to{transform:translateY(-10vh) scale(1.2); opacity:0;}
 }
 
 /* Container */
 .container{
     position:relative;
     width:90%;
-    max-width:600px;
+    max-width:650px;
     text-align:center;
     z-index:2;
 }
 
 /* Screens */
 .screen{
-    opacity:0;
-    transform:scale(.95);
-    pointer-events:none;
-    transition:all .6s ease;
-    position:absolute;
-    width:100%;
+    display:none;
+    animation:fade .5s ease;
 }
 
 .screen.active{
-    opacity:1;
-    transform:scale(1);
-    pointer-events:auto;
-    position:relative;
+    display:block;
+}
+
+@keyframes fade{
+    from{opacity:0; transform:scale(.96);}
+    to{opacity:1; transform:scale(1);}
 }
 
 /* Logo */
 .logo{
-    width:220px;
-    margin:20px auto 40px;
-    animation:fadeIn 1.5s ease forwards;
+    width:320px;
+    margin:0 auto 40px;
+    display:block;
+    animation:logoPop 3s ease-in-out infinite;
+    filter:drop-shadow(0 0 20px #ff4da6)
+           drop-shadow(0 0 40px #ff008c);
 }
 
-@keyframes fadeIn{
-    from{opacity:0;transform:translateY(-20px);}
-    to{opacity:1;transform:translateY(0);}
+@keyframes logoPop{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+}
+
+/* Titles */
+h2{
+    font-family:'Great Vibes', cursive;
+    font-size:50px;
+    margin-bottom:20px;
 }
 
 /* Buttons */
 button{
-    padding:14px 28px;
-    margin:12px;
-    font-size:20px;
+    padding:18px 40px;
+    margin:15px;
+    font-size:22px;
+    font-weight:600;
     border:none;
-    border-radius:40px;
+    border-radius:50px;
     background:linear-gradient(45deg,#ff008c,#ff5e62);
     color:white;
     cursor:pointer;
-    transition:.3s;
+    transition:.2s ease;
+    min-width:180px;
 }
 
 button:hover{
-    transform:translateY(-3px) scale(1.05);
-    box-shadow:0 10px 25px rgba(255,0,140,.5);
+    transform:scale(1.07);
+    box-shadow:0 10px 30px rgba(255,0,140,.6);
 }
 
 /* Bottle */
 .bottle{
-    width:40px;
-    height:120px;
+    width:50px;
+    height:150px;
     margin:40px auto;
     background:linear-gradient(#ff5e62,#99004d);
-    border-radius:20px;
+    border-radius:25px;
     position:relative;
-    transform-origin:center 80%;
-    transition:transform 3s cubic-bezier(.25,.1,.25,1);
+    transform-origin:center 85%;
+    transition:transform 2.5s cubic-bezier(.25,.1,.25,1);
+    box-shadow:0 0 25px #ff008c;
 }
 
 .bottle:before{
     content:"";
     position:absolute;
-    top:-30px;
-    left:10px;
-    width:20px;
-    height:30px;
+    top:-35px;
+    left:12px;
+    width:25px;
+    height:35px;
     background:#ff5e62;
-    border-radius:5px;
+    border-radius:8px;
 }
 
 /* Card */
@@ -119,10 +149,10 @@ button:hover{
 
 .card{
     width:100%;
-    min-height:150px;
+    min-height:170px;
     position:relative;
     transform-style:preserve-3d;
-    transition:transform .8s ease, transform .3s ease;
+    transition:transform .6s ease;
 }
 
 .card.flip{
@@ -133,14 +163,15 @@ button:hover{
     position:absolute;
     width:100%;
     backface-visibility:hidden;
-    padding:30px;
-    border-radius:20px;
-    background:rgba(255,255,255,0.1);
-    backdrop-filter:blur(10px);
-    font-size:22px;
+    padding:35px;
+    border-radius:25px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(12px);
+    font-size:24px;
     display:flex;
     align-items:center;
     justify-content:center;
+    text-align:center;
 }
 
 .card-back{
@@ -148,13 +179,27 @@ button:hover{
 }
 
 @media(max-width:600px){
-    .logo{width:160px;}
+    .logo{width:240px;}
+    h2{font-size:36px;}
     button{font-size:18px;}
-    .card-face{font-size:18px;}
+    .card-face{font-size:20px;}
 }
 </style>
 </head>
 <body>
+
+<!-- Floating Hearts Script Generated -->
+<script>
+for(let i=0;i<20;i++){
+    let heart=document.createElement("div");
+    heart.className="heart";
+    heart.innerHTML="❤";
+    heart.style.left=Math.random()*100+"vw";
+    heart.style.animationDuration=(5+Math.random()*5)+"s";
+    heart.style.fontSize=(15+Math.random()*25)+"px";
+    document.body.appendChild(heart);
+}
+</script>
 
 <div class="container">
 
@@ -232,10 +277,10 @@ function spinBottle(){
     bottle.style.transform="rotate("+(3600+Math.random()*360)+"deg)";
     setTimeout(()=>{
         showScreen("chooseScreen");
-    },3000);
+    },2500);
 }
 
-/* Choose Truth/Dare */
+/* Choose */
 function selectMode(mode){
     currentMode=mode;
     document.getElementById("modeTitle").innerText=mode.toUpperCase();
@@ -243,7 +288,6 @@ function selectMode(mode){
     showScreen("cardScreen");
 }
 
-/* Load Question */
 function loadQuestion(){
     let list=currentMode==="truth"?truths:dares;
     if(list.length===0){
