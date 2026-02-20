@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Truth & Dare - Couple Edition</title>
+<title>Truth or Dare - Couple Edition</title>
 
 <style>
 *{
@@ -14,74 +14,87 @@
 }
 
 body{
-    background: radial-gradient(circle at center,#4b006e,#1a001f);
-    color:white;
     height:100vh;
+    background:url("background.jpg") center/cover no-repeat;
     display:flex;
     justify-content:center;
     align-items:center;
-    text-align:center;
+    color:white;
+    overflow:hidden;
+}
+
+/* Dark overlay */
+body::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.55);
+    backdrop-filter:blur(6px);
 }
 
 /* Container */
 .container{
+    position:relative;
     width:90%;
     max-width:600px;
+    text-align:center;
+    z-index:2;
 }
 
 /* Screens */
 .screen{
-    display:none;
-    animation:fade .6s ease;
+    opacity:0;
+    transform:scale(.95);
+    pointer-events:none;
+    transition:all .6s ease;
+    position:absolute;
+    width:100%;
 }
 
 .screen.active{
-    display:block;
-}
-
-@keyframes fade{
-    from{opacity:0;transform:translateY(15px);}
-    to{opacity:1;transform:translateY(0);}
+    opacity:1;
+    transform:scale(1);
+    pointer-events:auto;
+    position:relative;
 }
 
 /* Logo */
 .logo{
-    font-size:32px;
-    font-weight:bold;
-    margin-bottom:30px;
-    animation:pulse 2s infinite;
+    width:220px;
+    margin:20px auto 40px;
+    animation:fadeIn 1.5s ease forwards;
 }
 
-@keyframes pulse{
-    0%,100%{opacity:.6;}
-    50%{opacity:1;}
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(-20px);}
+    to{opacity:1;transform:translateY(0);}
 }
 
-/* Button */
+/* Buttons */
 button{
-    padding:14px 25px;
-    margin:15px;
+    padding:14px 28px;
+    margin:12px;
     font-size:20px;
     border:none;
-    border-radius:30px;
-    background:#ff008c;
+    border-radius:40px;
+    background:linear-gradient(45deg,#ff008c,#ff5e62);
     color:white;
     cursor:pointer;
     transition:.3s;
 }
 
 button:hover{
-    transform:scale(1.08);
-    box-shadow:0 0 15px rgba(255,0,140,.6);
+    transform:translateY(-3px) scale(1.05);
+    box-shadow:0 10px 25px rgba(255,0,140,.5);
 }
 
-/* CSS Bottle */
+/* Bottle */
 .bottle{
     width:40px;
     height:120px;
     margin:40px auto;
-    background:linear-gradient(#ff008c,#99004d);
-    border-radius:20px 20px 10px 10px;
+    background:linear-gradient(#ff5e62,#99004d);
+    border-radius:20px;
     position:relative;
     transform-origin:center 80%;
     transition:transform 3s cubic-bezier(.25,.1,.25,1);
@@ -94,7 +107,7 @@ button:hover{
     left:10px;
     width:20px;
     height:30px;
-    background:#ff008c;
+    background:#ff5e62;
     border-radius:5px;
 }
 
@@ -106,23 +119,24 @@ button:hover{
 
 .card{
     width:100%;
-    min-height:140px;
+    min-height:150px;
     position:relative;
     transform-style:preserve-3d;
-    transition:transform .8s;
+    transition:transform .8s ease, transform .3s ease;
 }
 
 .card.flip{
-    transform:rotateY(180deg);
+    transform:rotateY(180deg) scale(1.05);
 }
 
 .card-face{
     position:absolute;
     width:100%;
     backface-visibility:hidden;
-    padding:25px;
+    padding:30px;
     border-radius:20px;
     background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
     font-size:22px;
     display:flex;
     align-items:center;
@@ -134,7 +148,7 @@ button:hover{
 }
 
 @media(max-width:600px){
-    .logo{font-size:26px;}
+    .logo{width:160px;}
     button{font-size:18px;}
     .card-face{font-size:18px;}
 }
@@ -146,7 +160,7 @@ button:hover{
 
 <!-- INTRO -->
 <div id="intro" class="screen active">
-    <div class="logo">💜 Truth & Dare<br>Couple Edition 💜</div>
+    <img src="logo.png" class="logo">
     <button onclick="startGame()">Start</button>
 </div>
 
@@ -155,6 +169,13 @@ button:hover{
     <h2>Spin the Bottle</h2>
     <div class="bottle" id="bottle"></div>
     <button onclick="spinBottle()">SPIN</button>
+</div>
+
+<!-- CHOOSE -->
+<div id="chooseScreen" class="screen">
+    <h2>Choose</h2>
+    <button onclick="selectMode('truth')">Truth</button>
+    <button onclick="selectMode('dare')">Dare</button>
 </div>
 
 <!-- CARD -->
@@ -181,7 +202,7 @@ let currentMode="";
 
 /* Load CSV */
 fetch("questions.csv")
-.then(response=>response.text())
+.then(res=>res.text())
 .then(data=>{
     const rows=data.split("\n").slice(1);
     rows.forEach(row=>{
@@ -193,9 +214,6 @@ fetch("questions.csv")
             if(type==="dare") dares.push(question);
         }
     });
-})
-.catch(err=>{
-    console.log("CSV Load Error:",err);
 });
 
 /* Screen Switch */
@@ -211,15 +229,18 @@ function startGame(){
 /* Spin */
 function spinBottle(){
     const bottle=document.getElementById("bottle");
-    const randomDeg=3600+Math.floor(Math.random()*360);
-    bottle.style.transform="rotate("+randomDeg+"deg)";
-
+    bottle.style.transform="rotate("+(3600+Math.random()*360)+"deg)";
     setTimeout(()=>{
-        currentMode=Math.random()<0.5?"truth":"dare";
-        document.getElementById("modeTitle").innerText=currentMode.toUpperCase();
-        loadQuestion();
-        showScreen("cardScreen");
+        showScreen("chooseScreen");
     },3000);
+}
+
+/* Choose Truth/Dare */
+function selectMode(mode){
+    currentMode=mode;
+    document.getElementById("modeTitle").innerText=mode.toUpperCase();
+    loadQuestion();
+    showScreen("cardScreen");
 }
 
 /* Load Question */
